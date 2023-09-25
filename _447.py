@@ -27,8 +27,11 @@ import matplotlib.pyplot as plt
 
 # symbolic computation, i.e. computer algebra (like Mathematica, Wolfram Alpha)
 import sympy as sym
-
+# print symbolic expressions using LaTeX-style formatting
 sym.init_printing(use_latex='mathjax')
+
+# --
+# Prof Burden provides the following functions used throughout the class:
 
 def Jacobian(g,y,d=1e-4):
   """
@@ -109,3 +112,5 @@ def numerical_simulation(f,t,x,t0=0.,dt=1e-4,ut=None,ux=None,utx=None,return_u=F
     return np.asarray(t_),np.asarray(x_),np.asarray(u_)
   else:
     return np.asarray(t_),np.asarray(x_)
+
+# --
