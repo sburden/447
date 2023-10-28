@@ -15,7 +15,7 @@ from scipy import signal as sig
 # produce matlab-style plots
 import matplotlib as mpl
 # increase font size on plots
-mpl.rc('font',**{'size':18})
+mpl.rc('font',**{'size':12})
 # use LaTeX to render symbols
 mpl.rc('text',usetex=False)
 # render animation
