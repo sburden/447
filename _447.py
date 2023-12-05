@@ -30,6 +30,9 @@ import sympy as sym
 # print symbolic expressions using LaTeX-style formatting
 sym.init_printing(use_latex='mathjax')
 
+# display(Math( latex_expression )) prints formatted math
+from IPython.display import display, Math
+
 # --
 # Prof Burden provides the following functions used throughout the class:
 
@@ -113,4 +116,91 @@ def numerical_simulation(f,t,x,t0=0.,dt=1e-4,ut=None,ux=None,utx=None,return_u=F
   else:
     return np.asarray(t_),np.asarray(x_)
 
-# --
+def phase_portrait(f,xlim=(-1,+1),ylim=(-1,+1),n=0,t=1,
+                   quiver=False,fs=(5,5),fig=None,ax=None):
+    """
+    phase portrait of a planar vector field 
+
+    input:
+    f : R x R^2 --> R^2 - planar vector field
+    xlim,ylim - 2-tuple - bounds for portrait
+    n - int - number of trajectories to simulate
+    t - scalar - simulation duration
+
+    (optional:)
+    quiver - bool - use quiver rather than stream plot
+    fs - 2-tuple - figure size
+
+    output:
+    fig,ax - figure and axis handles
+    """
+    if fig is not None:
+        fig = plt.figure(figsize=fs)
+
+    # phase portrait / "quiver" plot
+    if ax is not None:
+        ax = plt.subplot(1,1,1)
+    X, Y = np.meshgrid(np.linspace(xlim[0],xlim[1], 11), np.linspace(ylim[0], ylim[1], 11))
+    dX,dY = np.asarray([f(0,xy).flatten() for xy in zip(X.flatten(),Y.flatten())]).T
+    dX,dY = dX.reshape(X.shape),dY.reshape(Y.shape)
+    if quiver:
+        ax.quiver(X,Y,dX,dY)
+    else:
+        ax.streamplot(X,Y,dX,dY,density=2.,color=(0,0,0,.5))
+    ax.set_xlabel(r'$x_1$')
+    ax.set_ylabel(r'$x_2$')
+
+    for _ in range(n):
+      x0 = np.random.rand(2)*[np.diff(xlim)[0],np.diff(ylim)[0]] + [xlim[0],ylim[0]]
+      t_,x_ = numerical_simulation(f,t,x0)
+      ax.plot(x_[:,0],x_[:,1])
+
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    plt.tight_layout()
+    
+    return fig,ax
+
+def nyquist_plot(L,omega=None,fs=(5,5),fig=None,ax=None):
+    """
+    Nyquist plot of a transfer function  
+
+    input:
+    L : C --> C - single-input single-output transformation
+
+    output:
+    fig,ax - figure and axis handles
+    """
+    if omega is None:
+        omega = np.logspace(-2,+2,1000)
+        
+    Omega = L(1.j*omega)
+
+    abs_L = np.abs(Omega)
+    angle_L = np.unwrap(np.angle(Omega))*180./np.pi
+
+    circle = np.exp(1.j*np.linspace(np.pi/2,3*np.pi/2))
+
+    if fig is None:
+        fig = plt.figure(figsize=fs)
+    if ax is None:
+        ax = plt.subplot(1,1,1)
+    ax.grid('on'); ax.axis('equal')
+    # Omega, i.e. graph of L(j omega)
+    ax.plot(Omega.real,Omega.imag,'b-',label=r'$L(j\omega), \omega > 0$')
+    ax.plot(Omega.real,-Omega.imag,'b--',label=r'$L(j\omega), \omega < 0$')
+    # unit circle
+    ax.plot(circle.real,circle.imag,'k--',zorder=-1)
+    ylim = ax.get_ylim()
+    ax.vlines(0,ylim[0],ylim[1],color='k',ls='--',zorder=-1)
+    ax.set_ylim(ylim)
+    # critical point (-1. + 0.j)
+    ax.plot(-1.,0.,'ro',label=r'critical point $-1\in\mathbb{C}$')
+    # axis labels
+    ax.set_xlabel(r'$\operatorname{Re}\ L(j\omega)$')
+    ax.set_ylabel(r'$\operatorname{Im}\ L(j\omega)$');
+    
+    return fig,ax
+
+#--
