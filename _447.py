@@ -138,9 +138,8 @@ def phase_portrait(f,xlim=(-1,+1),ylim=(-1,+1),n=0,t=1,
         fig = plt.figure(figsize=fs)
 
     # phase portrait / "quiver" plot
-    if ax is not None:
+    if ax is None:
         ax = plt.subplot(1,1,1)
-        print(ax)
     X, Y = np.meshgrid(np.linspace(xlim[0],xlim[1], 11), np.linspace(ylim[0], ylim[1], 11))
     dX,dY = np.asarray([f(0,xy).flatten() for xy in zip(X.flatten(),Y.flatten())]).T
     dX,dY = dX.reshape(X.shape),dY.reshape(Y.shape)
